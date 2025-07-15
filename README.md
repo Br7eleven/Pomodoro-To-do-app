@@ -52,6 +52,16 @@ npm install pocketbase
 This app uses [PocketBase](https://pocketbase.io/) as a lightweight backend for storing tasks and Pomodoro sessions.
 
 ---
+---
+
+## 🖼️ Screenshots
+
+![App screenshot 1](ss1.png)
+
+
+![App screenshot 2](ss2.png)
+
+---
 
 ### ⚙️ 1. Start PocketBase Locally
 
