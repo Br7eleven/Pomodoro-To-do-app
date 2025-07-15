@@ -1,61 +1,36 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, Clock } from "lucide-react";
+import { Play, Pause, RotateCcw, Clock } from "lucide-react";
 
 export default function PomodoroTimer() {
-  const [customDurations, setCustomDurations] = useState({
-    Work: 25,
-    "Short Break": 5,
-    "Long Break": 15,
-  });
+  const [customTime, setCustomTime] = useState({ hours: 0, minutes: 25, seconds: 0 });
 
   const [timerState, setTimerState] = useState({
-    minutes: 25,
-    seconds: 0,
+    totalSeconds: 1500, // 25 mins default
+    remainingSeconds: 1500,
     isRunning: false,
-    session: "Work",
   });
 
   const audioRef = useRef(null);
+  const { totalSeconds, remainingSeconds, isRunning } = timerState;
 
-  const { minutes, seconds, isRunning, session } = timerState;
-
-  const formatTime = (mins, secs) =>
-    `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  const formatTime = (secs) => {
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
+    const seconds = secs % 60;
+    return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
 
   const tick = () => {
     setTimerState((prev) => {
-      let { minutes, seconds, session } = prev;
-
-      if (minutes === 0 && seconds === 0) {
-        const nextSession =
-          session === "Work"
-            ? "Short Break"
-            : session === "Short Break"
-            ? "Long Break"
-            : "Work";
-
-        notify(nextSession);
+      if (prev.remainingSeconds <= 0) {
+        notify();
         playSound();
-
-        return {
-          minutes: customDurations[nextSession],
-          seconds: 0,
-          isRunning: true,
-          session: nextSession,
-        };
+        return { ...prev, isRunning: false };
       }
-
-      if (seconds === 0) {
-        minutes -= 1;
-        seconds = 59;
-      } else {
-        seconds -= 1;
-      }
-
-      return { ...prev, minutes, seconds };
+      return { ...prev, remainingSeconds: prev.remainingSeconds - 1 };
     });
   };
 
@@ -71,10 +46,10 @@ export default function PomodoroTimer() {
     Notification.requestPermission();
   }, []);
 
-  const notify = (nextSession) => {
+  const notify = () => {
     if (Notification.permission === "granted") {
-      new Notification("Pomodoro Timer", {
-        body: `Time for: ${nextSession}`,
+      new Notification("Custom Timer", {
+        body: "Time's up!",
         icon: "/favicon.ico",
       });
     }
@@ -85,73 +60,46 @@ export default function PomodoroTimer() {
   };
 
   const startPause = () => {
+    if (!isRunning && remainingSeconds === 0) return;
     setTimerState((prev) => ({ ...prev, isRunning: !prev.isRunning }));
   };
 
   const reset = () => {
-    const mins = customDurations[session];
-    setTimerState((prev) => ({
-      ...prev,
-      minutes: mins,
-      seconds: 0,
+    const total =
+      customTime.hours * 3600 + customTime.minutes * 60 + customTime.seconds;
+    setTimerState({
+      totalSeconds: total,
+      remainingSeconds: total,
       isRunning: false,
-    }));
+    });
   };
 
-  const handleCustomChange = (type, value) => {
-    const newVal = Math.max(1, parseInt(value) || 1);
-    setCustomDurations((prev) => ({ ...prev, [type]: newVal }));
-    if (session === type) {
-      setTimerState((prev) => ({
-        ...prev,
-        minutes: newVal,
-        seconds: 0,
-        isRunning: false,
-      }));
-    }
+  const handleInputChange = (field, value) => {
+    const val = Math.max(0, parseInt(value) || 0);
+    const updated = { ...customTime, [field]: val };
+    setCustomTime(updated);
+
+    const total = updated.hours * 3600 + updated.minutes * 60 + updated.seconds;
+    setTimerState({
+      totalSeconds: total,
+      remainingSeconds: total,
+      isRunning: false,
+    });
   };
 
-  const getSessionIcon = () => {
-    switch (session) {
-      case "Work":
-        return <Brain className="w-6 h-6" />;
-      case "Short Break":
-        return <Coffee className="w-6 h-6" />;
-      case "Long Break":
-        return <Clock className="w-6 h-6" />;
-      default:
-        return <Brain className="w-6 h-6" />;
-    }
-  };
-
-  const getSessionColor = () => {
-    switch (session) {
-      case "Work":
-        return "from-red-500 to-orange-500";
-      case "Short Break":
-        return "from-green-500 to-emerald-500";
-      case "Long Break":
-        return "from-blue-500 to-indigo-500";
-      default:
-        return "from-red-500 to-orange-500";
-    }
-  };
-
-  const total = customDurations[session] * 60;
-  const remaining = minutes * 60 + seconds;
-  const progress = ((total - remaining) / total) * 100;
+  const progress = totalSeconds === 0 ? 0 : ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
 
   return (
     <div className="backdrop-blur-xl bg-white/70 rounded-3xl p-8 shadow-2xl border border-white/20">
       <audio ref={audioRef} src="/bomb_timer.mp3" preload="auto" />
-      
+
       <div className="flex items-center justify-center gap-3 mb-8">
-        <div className={`p-3 rounded-2xl bg-gradient-to-r ${getSessionColor()} text-white shadow-lg`}>
-          {getSessionIcon()}
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg">
+          <Clock className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">{session}</h2>
-          <p className="text-gray-600 text-sm">Stay focused and productive</p>
+          <h2 className="text-2xl font-bold text-gray-800">Custom Timer</h2>
+          <p className="text-gray-600 text-sm">Set your own time and start</p>
         </div>
       </div>
 
@@ -174,25 +122,28 @@ export default function PomodoroTimer() {
             />
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ef4444" />
-                <stop offset="100%" stopColor="#f97316" />
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#6366f1" />
               </linearGradient>
             </defs>
           </svg>
 
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-5xl font-bold text-gray-800 font-mono">
-                {formatTime(minutes, seconds)}
+              <div className="text-4xl font-bold text-gray-800 font-mono">
+                {formatTime(remainingSeconds)}
               </div>
-              <div className="text-sm text-gray-500 mt-2">{isRunning ? "Running" : "Paused"}</div>
+              <div className="text-sm text-gray-500 mt-2">
+                {isRunning ? "Running" : "Paused"}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="flex justify-center gap-4 mb-4">
-        <motion.button onClick={startPause}
+        <motion.button
+          onClick={startPause}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-white shadow-lg ${
@@ -205,7 +156,8 @@ export default function PomodoroTimer() {
           {isRunning ? "Pause" : "Start"}
         </motion.button>
 
-        <motion.button onClick={reset}
+        <motion.button
+          onClick={reset}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-gray-700 bg-white/80 hover:bg-white shadow-lg border border-gray-200"
@@ -216,15 +168,15 @@ export default function PomodoroTimer() {
       </div>
 
       <div className="flex justify-center gap-2 mt-4 flex-wrap">
-        {["Work", "Short Break", "Long Break"].map((type) => (
+        {["hours", "minutes", "seconds"].map((field) => (
           <input
-            key={type}
+            key={field}
             type="number"
-            min={1}
-            value={customDurations[type]}
-            onChange={(e) => handleCustomChange(type, e.target.value)}
+            min={0}
+            value={customTime[field]}
+            onChange={(e) => handleInputChange(field, e.target.value)}
             className="px-3 py-2 rounded-xl text-sm w-24 text-center text-gray-700 bg-white/70 border border-gray-300 focus:ring-2 focus:ring-indigo-500"
-            placeholder={`${type} min`}
+            placeholder={field}
           />
         ))}
       </div>
