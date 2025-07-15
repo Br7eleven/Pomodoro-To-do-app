@@ -37,7 +37,14 @@ cd Pomodoro-To-do-app
 ```bash
 npm install
 ```
+# React Icons & UI
+npm install lucide-react
 
+# Animations
+npm install framer-motion
+
+# PocketBase client (if used directly)
+npm install pocketbase
 ---
 
 ## 🗃️ PocketBase Backend Setup
