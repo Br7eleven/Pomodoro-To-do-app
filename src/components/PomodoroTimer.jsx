@@ -104,7 +104,7 @@ export default function PomodoroTimer() {
       </div>
 
       <div className="relative mb-8">
-        <div className="relative w-64 h-64 mx-auto">
+       <div className="relative w-full max-w-[256px] aspect-square mx-auto">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="2" fill="none" className="text-gray-200" />
             <motion.circle

@@ -95,36 +95,37 @@ export default function TodoList({ todos, setTodos }) {
         </div>
       </div>
 
-      <div className="flex gap-3 mb-6">
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && newTodo.trim()) {
-              addTodo(newTodo.trim());
-              setNewTodo("");
-            }
-          }}
-          placeholder="Add a new task..."
-          className="flex-1 px-4 py-3 rounded-2xl bg-white/80 border border-gray-200 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          autoFocus
-        />
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (newTodo.trim()) {
-              addTodo(newTodo.trim());
-              setNewTodo("");
-            }
-          }}
-          className="flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg"
-        >
-          <Plus className="w-5 h-5" />
-          Add
-        </motion.button>
-      </div>
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+  <input
+    type="text"
+    value={newTodo}
+    onChange={(e) => setNewTodo(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" && newTodo.trim()) {
+        addTodo(newTodo.trim());
+        setNewTodo("");
+      }
+    }}
+    placeholder="Add a new task..."
+    className="w-full sm:flex-1 px-4 py-3 rounded-2xl bg-white/80 border border-gray-200 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    autoFocus
+  />
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={() => {
+      if (newTodo.trim()) {
+        addTodo(newTodo.trim());
+        setNewTodo("");
+      }
+    }}
+    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg"
+  >
+    <Plus className="w-5 h-5" />
+    Add
+  </motion.button>
+</div>
+
 
       <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
         <AnimatePresence>
@@ -135,11 +136,11 @@ export default function TodoList({ todos, setTodos }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-200 ${
-                todo.completed
-                  ? "bg-green-50 border-green-200"
-                  : "bg-white/80 border-gray-200 hover:bg-white"
-              }`}
+              className={`flex items-center justify-between min-h-[64px] p-4 rounded-2xl border transition-all duration-200 ${
+                   todo.completed
+                     ? "bg-green-50 border-green-200"
+                     : "bg-white/80 border-gray-200 hover:bg-white"
+                  }`}
             >
               <div className="flex items-center gap-3">
                 <motion.button
